@@ -5,6 +5,10 @@
   <title>Focus Timer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2973266367174049"
+     crossorigin="anonymous"></script>
+
   <style>
     body {
       margin: 0;
@@ -60,6 +64,11 @@
     .focus #time {
       font-size: 9rem;
     }
+
+    .ad-container {
+      margin: 16px 0;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -78,6 +87,22 @@
     </div>
 
     <div id="time">00:00:00</div>
+
+    <!-- AdSense Ad Unit -->
+    <div class="ad-container">
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2973266367174049"
+           crossorigin="anonymous"></script>
+      <!-- TimerAd1 -->
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-2973266367174049"
+           data-ad-slot="4306368366"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+           (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </div>
   </div>
 
   <script>
@@ -105,9 +130,9 @@
       // Request full screen
       if (document.documentElement.requestFullscreen) {
         document.documentElement.requestFullscreen();
-      } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
+      } else if (document.documentElement.webkitRequestFullscreen) {
         document.documentElement.webkitRequestFullscreen();
-      } else if (document.documentElement.msRequestFullscreen) { /* IE11 */
+      } else if (document.documentElement.msRequestFullscreen) {
         document.documentElement.msRequestFullscreen();
       }
 
