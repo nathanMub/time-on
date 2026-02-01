@@ -1,407 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Focus Timer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time-On</title>
+    <link rel="icon" href="favicon.ico">
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2973266367174049"
+        crossorigin="anonymous"></script>
 
-    body {
-      min-height: 100vh;
-      background: #000000;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      color: #ffffff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-    }
+    <!-- GDPR Consent Banner -->
+    <style>
+        #consent-banner {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #111;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            z-index: 9999;
+        }
+        #consent-banner button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background: #ff4d6d;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
+    <script>
+        function acceptAds() {
+            document.getElementById('consent-banner').style.display = 'none';
+            localStorage.setItem('adsConsent', 'true');
+        }
+        window.onload = function () {
+            if (!localStorage.getItem('adsConsent')) {
+                document.getElementById('consent-banner').style.display = 'block';
+            }
+        }
+    </script>
 
-    /* Subtle animated background gradient */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(ellipse at 50% 50%, rgba(30, 30, 40, 0.4) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .container {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      padding: 20px;
-      gap: 40px;
-    }
-
-    #controls {
-      width: 100%;
-      max-width: 320px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      opacity: 1;
-      transform: translateY(0);
-      transition: opacity 0.4s ease, transform 0.4s ease;
-    }
-
-    .input-group {
-      position: relative;
-    }
-
-    .input-label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: rgba(255, 255, 255, 0.5);
-      text-align: left;
-      margin-bottom: 8px;
-    }
-
-    select, input {
-      width: 100%;
-      padding: 16px 20px;
-      font-size: 1rem;
-      font-family: inherit;
-      font-weight: 500;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.03);
-      color: white;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      appearance: none;
-      -webkit-appearance: none;
-    }
-
-    select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 16px center;
-      background-size: 18px;
-      padding-right: 48px;
-    }
-
-    select option {
-      background: #111;
-      color: white;
-      padding: 12px;
-    }
-
-    input::placeholder {
-      color: rgba(255, 255, 255, 0.3);
-    }
-
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    input[type=number] {
-      -moz-appearance: textfield;
-    }
-
-    select:hover, input:hover {
-      border-color: rgba(255, 255, 255, 0.15);
-      background-color: rgba(255, 255, 255, 0.05);
-    }
-
-    select:focus, input:focus {
-      outline: none;
-      border-color: rgba(255, 255, 255, 0.25);
-      background-color: rgba(255, 255, 255, 0.05);
-      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
-    }
-
-    .button-group {
-      display: flex;
-      gap: 12px;
-      margin-top: 8px;
-    }
-
-    button {
-      flex: 1;
-      padding: 18px 24px;
-      font-size: 0.95rem;
-      font-family: inherit;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      border-radius: 16px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    button:hover::before {
-      opacity: 1;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
-      color: #000000;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
-    }
-
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.06);
-      color: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.15);
-      color: white;
-    }
-
-    #time {
-      font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', monospace;
-      font-size: clamp(3rem, 12vw, 6rem);
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      user-select: none;
-      opacity: 0.9;
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      text-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
-    }
-
-    /* Focus mode styles */
-    .focus #controls {
-      opacity: 0;
-      transform: translateY(20px);
-      pointer-events: none;
-      position: absolute;
-    }
-
-    .focus #time {
-      font-size: clamp(5rem, 25vw, 12rem);
-      opacity: 1;
-      text-shadow: 0 0 80px rgba(255, 255, 255, 0.15);
-    }
-
-    /* Pause hint */
-    .pause-hint {
-      position: fixed;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.3);
-      letter-spacing: 1px;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      pointer-events: none;
-    }
-
-    .focus .pause-hint {
-      opacity: 1;
-    }
-
-    /* App title */
-    .app-title {
-      position: absolute;
-      top: 32px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      color: rgba(255, 255, 255, 0.25);
-      transition: opacity 0.4s ease;
-    }
-
-    .focus .app-title {
-      opacity: 0;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 480px) {
-      #controls {
-        max-width: 100%;
-        padding: 0 16px;
-      }
-
-      select, input {
-        padding: 14px 16px;
-      }
-
-      button {
-        padding: 16px 20px;
-      }
-
-      .button-group {
-        flex-direction: column;
-      }
-
-      .pause-hint {
-        bottom: 24px;
-      }
-    }
-
-    /* Animation for timer running */
-    @keyframes pulse {
-      0%, 100% { opacity: 0.9; }
-      50% { opacity: 1; }
-    }
-
-    .focus #time {
-      animation: pulse 4s ease-in-out infinite;
-    }
-  </style>
+    <style>
+        /* AMOLED True Black Background */
+        body {
+            margin: 0;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #timer {
+            font-size: 10vw;
+            user-select: none;
+        }
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .full-screen-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #ff4d6d;
+            border: none;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 999;
+        }
+    </style>
 </head>
 <body>
-
-  <div class="container" id="app" onclick="screenTap()">
-    <span class="app-title">Focus Timer</span>
-
-    <div id="controls">
-      <div class="input-group">
-        <label class="input-label" for="mode">Timer Mode</label>
-        <select id="mode">
-          <option value="up">Count Up</option>
-          <option value="down">Count Down</option>
-        </select>
-      </div>
-
-      <div class="input-group">
-        <label class="input-label" for="minutesInput">Duration</label>
-        <input type="number" id="minutesInput" placeholder="Minutes (for countdown)" min="0">
-      </div>
-
-      <div class="button-group">
-        <button class="btn-primary" onclick="start(event)">Start</button>
-        <button class="btn-secondary" onclick="reset(event)">Reset</button>
-      </div>
+    <div id="overlay">
+        <div id="timer">00:00:00</div>
     </div>
 
-    <div id="time">00:00:00</div>
+    <!-- AdSense Ad Placement -->
+    <ins class="adsbygoogle"
+         style="display:block; text-align:center;"
+         data-ad-client="ca-pub-2973266367174049"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
 
-    <span class="pause-hint">Tap anywhere to pause</span>
-  </div>
+    <!-- GDPR Consent Banner -->
+    <div id="consent-banner" style="display:none;">
+        This site uses ads to support free study tools. 
+        <button onclick="acceptAds()">Consent</button>
+        <button onclick="acceptAds()">Manage</button>
+    </div>
 
-  <script>
-    let totalSeconds = 0;
-    let interval = null;
+    <button class="full-screen-btn" onclick="toggleFullScreen()">Full Screen</button>
 
-    function formatTime(sec) {
-      const h = String(Math.floor(sec / 3600)).padStart(2, '0');
-      const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
-      const s = String(sec % 60).padStart(2, '0');
-      return `${h}:${m}:${s}`;
-    }
+    <script>
+        let timerElement = document.getElementById('timer');
+        let overlay = document.getElementById('overlay');
+        let running = false;
+        let seconds = 0;
 
-    function updateDisplay() {
-      document.getElementById("time").textContent = formatTime(totalSeconds);
-    }
-
-    function start(event) {
-      event.stopPropagation();
-      if (interval) return;
-
-      const mode = document.getElementById("mode").value;
-      document.getElementById("app").classList.add("focus");
-
-      // Request full screen
-      if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen();
-      } else if (document.documentElement.webkitRequestFullscreen) {
-        document.documentElement.webkitRequestFullscreen();
-      } else if (document.documentElement.msRequestFullscreen) {
-        document.documentElement.msRequestFullscreen();
-      }
-
-      if (mode === "down" && totalSeconds === 0) {
-        const minutes = parseInt(document.getElementById("minutesInput").value || 0);
-        totalSeconds = minutes * 60;
-        if (totalSeconds === 0) return;
-        updateDisplay();
-      }
-
-      interval = setInterval(() => {
-        if (mode === "up") {
-          totalSeconds++;
-        } else if (mode === "down") {
-          if (totalSeconds === 0) {
-            pause();
-            return;
-          }
-          totalSeconds--;
+        function formatTime(sec) {
+            let hrs = Math.floor(sec / 3600);
+            let mins = Math.floor((sec % 3600) / 60);
+            let secs = sec % 60;
+            return `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
         }
-        updateDisplay();
-      }, 1000);
-    }
 
-    function pause() {
-      clearInterval(interval);
-      interval = null;
-      document.getElementById("app").classList.remove("focus");
+        function startTimer() {
+            if (!running) {
+                running = true;
+                overlay.style.display = 'flex';
+                timerInterval = setInterval(() => {
+                    seconds++;
+                    timerElement.textContent = formatTime(seconds);
+                }, 1000);
+            }
+        }
 
-      // Exit full screen
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => {});
-      } else if (document.webkitFullscreenElement) {
-        document.webkitExitFullscreen();
-      } else if (document.msFullscreenElement) {
-        document.msExitFullscreen();
-      }
-    }
+        function pauseTimer() {
+            running = false;
+            clearInterval(timerInterval);
+        }
 
-    function reset(event) {
-      event.stopPropagation();
-      pause();
-      totalSeconds = 0;
-      updateDisplay();
-    }
+        overlay.addEventListener('click', () => {
+            if (running) pauseTimer();
+            else startTimer();
+        });
 
-    function screenTap() {
-      if (interval) pause();
-    }
-  </script>
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
 
+        // Start paused, wait for tap
+        timerElement.textContent = formatTime(seconds);
+    </script>
+
+    <!-- About / Contact Section (for AdSense) -->
+    <div style="position:fixed; bottom:0; width:100%; text-align:center; color:#888; font-size:14px; background:#000; padding:5px; z-index:5;">
+        About: Time-On is a free study timer helping you focus and track study hours. | Contact: <a href="mailto:nathanmubvuta@gmail.com" style="color:#ff4d6d;">Email me</a>
+    </div>
 </body>
 </html>
