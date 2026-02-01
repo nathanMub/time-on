@@ -1,166 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time-On</title>
-    <link rel="icon" href="favicon.ico">
+  <meta charset="UTF-8">
+  <title>Focus Timer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2973266367174049"
-        crossorigin="anonymous"></script>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #000000; /* AMOLED true black */
+      font-family: Arial, sans-serif;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-    <!-- GDPR Consent Banner -->
-    <style>
-        #consent-banner {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: #111;
-            color: #fff;
-            padding: 15px;
-            text-align: center;
-            font-family: Arial, sans-serif;
-            z-index: 9999;
-        }
-        #consent-banner button {
-            margin-left: 10px;
-            padding: 5px 10px;
-            background: #ff4d6d;
-            border: none;
-            color: white;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-    </style>
-    <script>
-        function acceptAds() {
-            document.getElementById('consent-banner').style.display = 'none';
-            localStorage.setItem('adsConsent', 'true');
-        }
-        window.onload = function () {
-            if (!localStorage.getItem('adsConsent')) {
-                document.getElementById('consent-banner').style.display = 'block';
-            }
-        }
-    </script>
+    .container {
+      text-align: center;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
 
-    <style>
-        /* AMOLED True Black Background */
-        body {
-            margin: 0;
-            background: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-        #timer {
-            font-size: 10vw;
-            user-select: none;
-        }
-        #overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 10;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .full-screen-btn {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #ff4d6d;
-            border: none;
-            color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 999;
-        }
-    </style>
+    #controls {
+      max-width: 260px;
+    }
+
+    select, input, button {
+      width: 100%;
+      padding: 14px;
+      margin: 8px 0;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      border: none;
+      background: #0a0a0a;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1a1a1a;
+    }
+
+    #time {
+      font-size: 4rem;
+      letter-spacing: 4px;
+      user-select: none;
+    }
+
+    .focus #controls {
+      display: none;
+    }
+
+    .focus #time {
+      font-size: 9rem;
+    }
+  </style>
 </head>
 <body>
-    <div id="overlay">
-        <div id="timer">00:00:00</div>
+
+  <div class="container" id="app" onclick="screenTap()">
+    <div id="controls">
+      <select id="mode">
+        <option value="up">Count Up</option>
+        <option value="down">Count Down</option>
+      </select>
+
+      <input type="number" id="minutesInput" placeholder="Minutes (for countdown)" min="0">
+
+      <button onclick="start(event)">Start</button>
+      <button onclick="reset(event)">Reset</button>
     </div>
 
-    <!-- AdSense Ad Placement -->
-    <ins class="adsbygoogle"
-         style="display:block; text-align:center;"
-         data-ad-client="ca-pub-2973266367174049"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
+    <div id="time">00:00:00</div>
+  </div>
 
-    <!-- GDPR Consent Banner -->
-    <div id="consent-banner" style="display:none;">
-        This site uses ads to support free study tools. 
-        <button onclick="acceptAds()">Consent</button>
-        <button onclick="acceptAds()">Manage</button>
-    </div>
+  <script>
+    let totalSeconds = 0;
+    let interval = null;
 
-    <button class="full-screen-btn" onclick="toggleFullScreen()">Full Screen</button>
+    function formatTime(sec) {
+      const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+      const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
 
-    <script>
-        let timerElement = document.getElementById('timer');
-        let overlay = document.getElementById('overlay');
-        let running = false;
-        let seconds = 0;
+    function updateDisplay() {
+      document.getElementById("time").textContent = formatTime(totalSeconds);
+    }
 
-        function formatTime(sec) {
-            let hrs = Math.floor(sec / 3600);
-            let mins = Math.floor((sec % 3600) / 60);
-            let secs = sec % 60;
-            return `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+    function start(event) {
+      event.stopPropagation(); // prevent click from container
+      if (interval) return;
+
+      const mode = document.getElementById("mode").value;
+      document.getElementById("app").classList.add("focus");
+
+      // Request full screen
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+      } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
+        document.documentElement.webkitRequestFullscreen();
+      } else if (document.documentElement.msRequestFullscreen) { /* IE11 */
+        document.documentElement.msRequestFullscreen();
+      }
+
+      if (mode === "down" && totalSeconds === 0) {
+        const minutes = parseInt(document.getElementById("minutesInput").value || 0);
+        totalSeconds = minutes * 60;
+        if (totalSeconds === 0) return; // Don't start if 0
+        updateDisplay();
+      }
+
+      interval = setInterval(() => {
+        if (mode === "up") {
+          totalSeconds++;
+        } else if (mode === "down") {
+          if (totalSeconds === 0) {
+            pause();
+            return;
+          }
+          totalSeconds--;
         }
+        updateDisplay();
+      }, 1000);
+    }
 
-        function startTimer() {
-            if (!running) {
-                running = true;
-                overlay.style.display = 'flex';
-                timerInterval = setInterval(() => {
-                    seconds++;
-                    timerElement.textContent = formatTime(seconds);
-                }, 1000);
-            }
-        }
+    function pause() {
+      clearInterval(interval);
+      interval = null;
+      document.getElementById("app").classList.remove("focus");
 
-        function pauseTimer() {
-            running = false;
-            clearInterval(timerInterval);
-        }
+      // Exit full screen
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitFullscreenElement) {
+        document.webkitExitFullscreen();
+      } else if (document.msFullscreenElement) {
+        document.msExitFullscreen();
+      }
+    }
 
-        overlay.addEventListener('click', () => {
-            if (running) pauseTimer();
-            else startTimer();
-        });
+    function reset(event) {
+      event.stopPropagation();
+      pause();
+      totalSeconds = 0;
+      updateDisplay();
+    }
 
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else {
-                document.exitFullscreen();
-            }
-        }
+    function screenTap() {
+      if (interval) pause();
+    }
+  </script>
 
-        // Start paused, wait for tap
-        timerElement.textContent = formatTime(seconds);
-    </script>
-
-    <!-- About / Contact Section (for AdSense) -->
-    <div style="position:fixed; bottom:0; width:100%; text-align:center; color:#888; font-size:14px; background:#000; padding:5px; z-index:5;">
-        About: Time-On is a free study timer helping you focus, stay productive, and track your study hours. | Contact: <a href="mailto:nathanmubvuta@gmail.com" style="color:#ff4d6d;">Email me</a>
-    </div>
 </body>
 </html>
