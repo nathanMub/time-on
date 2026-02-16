@@ -2,182 +2,194 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Focus Timer</title>
-    <title>Focus Timer – Free Online Study & Productivity Timer</title>
-
-<meta name="description" content="A free, distraction-free focus timer to help you study, work, and stay productive. Count up or count down with fullscreen focus mode.">
-
-<meta name="keywords" content="focus timer, study timer, pomodoro timer, productivity timer, online timer">
-
-<meta name="robots" content="index, follow">
-
-<link rel="canonical" href="https://time-on-focus.vercel.app/">
-
+  <title>Focus Timer | Minimalist Deep Work Tool</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Google AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2973266367174049"
-     crossorigin="anonymous"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --accent: #ffffff;
+      --bg: #000000;
+      --glass: rgba(255, 255, 255, 0.03);
+      --border: rgba(255, 255, 255, 0.1);
+    }
 
-}
-body, html {
-  height: 100%;
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #111; /* dark background helps focus */
-  color: #fff;
-  font-family: Arial, sans-serif;
-}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-#timer {
-  font-size: 6rem; /* big timer text */
-  font-weight: bold;
-  text-align: center;
-}
-    button {
-  font-size: 1.5rem;
-  padding: 10px 20px;
-  margin-top: 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #2ecc71;
-  color: #fff;
-}
-
-
-}
-.page-wrapper {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-section {
-  width: 100%;
-}
-
-}
-
-}
-
+    body {
+      background: var(--bg);
+      color: var(--accent);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
     }
 
     .container {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  padding: 20px;
-  gap: 40px;
-}
-
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
     }
 
-    #controls {
-      max-width: 260px;
-    }
-
-    select, input, button {
+    /* AdSense Placeholder Styling */
+    .ad-wrapper {
       width: 100%;
-      padding: 14px;
-      margin: 8px 0;
-      font-size: 1.1rem;
-      border-radius: 12px;
-      border: none;
-      background: #0a0a0a;
-      color: white;
-      cursor: pointer;
+      max-width: 728px;
+      min-height: 90px;
+      margin: 20px 0;
+      background: var(--glass);
+      border: 1px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.2);
+      font-size: 0.7rem;
+      letter-spacing: 2px;
     }
 
-    button:hover {
-      background: #1a1a1a;
+    .timer-box {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      padding: 50px 30px;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      transition: all 0.5s ease;
     }
 
     #time {
-      font-size: 4rem;
-      letter-spacing: 4px;
-      user-select: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(3.5rem, 10vw, 5rem);
+      font-weight: 600;
+      margin-bottom: 30px;
     }
 
-    .focus #controls {
-      display: none;
+    .input-group { margin-bottom: 20px; text-align: left; }
+    
+    label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 8px;
+      display: block;
     }
 
-    .focus #time {
-      font-size: 9rem;
-    }
-
-    .ad-container {
-      margin: 16px 0;
+    select, input {
       width: 100%;
+      padding: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: white;
+      font-family: inherit;
     }
-    .focus footer {
-  display: none;
-}
 
+    .btn-group { display: flex; gap: 10px; margin-top: 25px; }
+    
+    button {
+      flex: 1;
+      padding: 15px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn-start { background: #fff; color: #000; }
+    .btn-reset { background: rgba(255,255,255,0.1); color: #fff; }
+
+    /* Focus Mode Logic */
+    .focus-mode .timer-box { border: none; background: transparent; backdrop-filter: none; max-width: 100%; }
+    .focus-mode #controls, .focus-mode .content-section, .focus-mode .ad-wrapper, .focus-mode footer { 
+      opacity: 0; pointer-events: none; 
+    }
+    .focus-mode #time {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: clamp(6rem, 20vw, 12rem);
+    }
+
+    /* Content Section for AdSense Approval */
+    .content-section {
+      max-width: 800px;
+      margin-top: 80px;
+      padding: 40px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .content-section h1, .content-section h2 { color: #fff; margin: 30px 0 15px; }
+    .content-section p { color: #aaa; margin-bottom: 20px; font-size: 1.05rem; }
+
+    footer {
+      width: 100%;
+      padding: 40px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #666;
+    }
+    footer a { color: #999; text-decoration: none; margin: 0 10px; }
   </style>
 </head>
-<body>
+<body id="mainBody">
 
   <div class="container" id="app" onclick="screenTap()">
-    <div id="controls">
-      <select id="mode">
-        <option value="up">Count Up</option>
-        <option value="down">Count Down</option>
-      </select>
+    
+    <div class="ad-wrapper">ADSENSE AUTO-ADS / BANNER</div>
 
-      <input type="number" id="minutesInput" placeholder="Minutes (for countdown)" min="0">
+    <div class="timer-box">
+      <div id="time">00:00:00</div>
 
-      <button onclick="start(event)">Start</button>
-      <button onclick="reset(event)">Reset</button>
+      <div id="controls">
+        <div class="input-group">
+          <label>Mode</label>
+          <select id="mode">
+            <option value="up">Count Up</option>
+            <option value="down">Count Down</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Duration (Minutes)</label>
+          <input type="number" id="minutesInput" placeholder="Enter minutes...">
+        </div>
+        <div class="btn-group">
+          <button class="btn-start" onclick="start(event)">Start Session</button>
+          <button class="btn-reset" onclick="reset(event)">Reset</button>
+        </div>
+      </div>
     </div>
 
-    <div id="time">00:00:00</div>
-    <footer style="max-width:600px; text-align:center; font-size:0.9rem; opacity:0.7; margin-top:20px;">
-  <p>
-    Time On Focus is a simple online focus timer designed to help students and creators
-    stay productive. Use it as a study timer, work timer, or Pomodoro-style session tool.
-  </p>
-     
+    <div class="ad-wrapper">ADSENSE IN-FEED AD</div>
 
-    <footer style="
-  max-width:600px;
-  text-align:center;
-  font-size:0.9rem;
-  opacity:0.7;
-  margin-top:40px;
-  padding-bottom:20px;
+    <section class="content-section">
+      <h1>What Is Time On Focus?</h1>
+      <p>Time On Focus is a minimal, distraction-free online focus timer designed to help you enter deep work sessions. Whether you are studying, coding, reading, or working on a project, this timer allows you to count up or count down while maintaining a clean, immersive environment.</p>
 
-">
-      
+      <h2>How To Use The Focus Timer</h2>
+      <p>Choose between count up or count down mode. If using countdown mode, enter your desired number of minutes. Press start to enter focus mode. The timer expands to fullscreen and minimizes distractions. Tap anywhere on the screen to pause your session.</p>
 
-    <!-- AdSense Ad Unit -->
-    <div class="ad-container">
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2973266367174049"
-           crossorigin="anonymous"></script>
-      <!-- TimerAd1 -->
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-2973266367174049"
-           data-ad-slot="4306368366"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
-      <script>
-           (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
-    </div>
+      <h2>Benefits of Focus Sessions</h2>
+      <p>Structured focus sessions improve concentration, reduce task switching, and increase productivity. Research shows that working in timed intervals can help maintain mental clarity and reduce burnout.</p>
+
+      <h2>Frequently Asked Questions</h2>
+      <p><strong>Is this focus timer free?</strong><br>Yes. Time On Focus is completely free to use online.</p>
+      <p><strong>Does it work on mobile?</strong><br>Yes. The timer is fully responsive and works on smartphones, tablets, and desktop browsers.</p>
+    </section>
+
+    <footer>
+      <p>© 2026 Time On Focus. All rights reserved.</p>
+      <p style="margin-top: 10px;">
+        <a href="/privacy.html">Privacy Policy</a> | 
+        <a href="/terms.html">Terms of Service</a>
+      </p>
+    </footer>
   </div>
 
   <script>
@@ -196,25 +208,16 @@ section {
     }
 
     function start(event) {
-      event.stopPropagation(); // prevent click from container
+      event.stopPropagation();
       if (interval) return;
 
       const mode = document.getElementById("mode").value;
-      document.getElementById("app").classList.add("focus");
-
-      // Request full screen
-      if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen();
-      } else if (document.documentElement.webkitRequestFullscreen) {
-        document.documentElement.webkitRequestFullscreen();
-      } else if (document.documentElement.msRequestFullscreen) {
-        document.documentElement.msRequestFullscreen();
-      }
+      document.getElementById("mainBody").classList.add("focus-mode");
 
       if (mode === "down" && totalSeconds === 0) {
         const minutes = parseInt(document.getElementById("minutesInput").value || 0);
         totalSeconds = minutes * 60;
-        if (totalSeconds === 0) return; // Don't start if 0
+        if (totalSeconds === 0) return;
         updateDisplay();
       }
 
@@ -222,7 +225,7 @@ section {
         if (mode === "up") {
           totalSeconds++;
         } else if (mode === "down") {
-          if (totalSeconds === 0) {
+          if (totalSeconds <= 0) {
             pause();
             return;
           }
@@ -235,16 +238,7 @@ section {
     function pause() {
       clearInterval(interval);
       interval = null;
-      document.getElementById("app").classList.remove("focus");
-
-      // Exit full screen
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => {});
-      } else if (document.webkitFullscreenElement) {
-        document.webkitExitFullscreen();
-      } else if (document.msFullscreenElement) {
-        document.msExitFullscreen();
-      }
+      document.getElementById("mainBody").classList.remove("focus-mode");
     }
 
     function reset(event) {
@@ -258,76 +252,5 @@ section {
       if (interval) pause();
     }
   </script>
-      <div class="page-wrapper">
-
-  <div class="container" id="app" onclick="screenTap()">
-    ...
-  </div>
-
-</div>
-
-<!-- Content Section For AdSense Approval -->
-<section style="background:#0a0a0a; color:#ccc; padding:80px 20px; font-family:Inter, sans-serif; line-height:1.8;">
-  <div style="max-width:900px; margin:auto;">
-
-    <h1 style="color:white; margin-bottom:20px;">What Is Time On Focus?</h1>
-    <p>
-      Time On Focus is a minimal, distraction-free online focus timer designed to help you enter deep work sessions.
-      Whether you are studying, coding, reading, or working on a project, this timer allows you to count up or count down
-      while maintaining a clean, immersive environment.
-    </p>
-
-    <p>
-      Unlike cluttered productivity apps, Time On Focus removes visual noise and helps you concentrate entirely on the task
-      at hand. The fullscreen focus mode enhances immersion, helping you stay present and productive.
-    </p>
-
-    <h2 style="color:white; margin-top:60px;">How To Use The Focus Timer</h2>
-    <p>
-      Choose between count up or count down mode. If using countdown mode, enter your desired number of minutes.
-      Press start to enter focus mode. The timer expands to fullscreen and minimizes distractions.
-      Tap anywhere on the screen to pause your session.
-    </p>
-
-    <p>
-      This timer can be used with popular productivity methods such as the Pomodoro Technique,
-      time blocking, or deep work sessions.
-    </p>
-
-    <h2 style="color:white; margin-top:60px;">Benefits of Focus Sessions</h2>
-    <p>
-      Structured focus sessions improve concentration, reduce task switching, and increase productivity.
-      Research shows that working in timed intervals can help maintain mental clarity and reduce burnout.
-      By committing to uninterrupted focus periods, you train your brain to resist distractions.
-    </p>
-
-    <h2 style="color:white; margin-top:60px;">Frequently Asked Questions</h2>
-    <p><strong>Is this focus timer free?</strong><br>
-    Yes. Time On Focus is completely free to use online.</p>
-
-    <p><strong>Does it work on mobile?</strong><br>
-    Yes. The timer is fully responsive and works on smartphones, tablets, and desktop browsers.</p>
-
-    <p><strong>Do I need to install anything?</strong><br>
-    No installation is required. Simply open the website and start focusing.</p>
-
-  </div>
-</section>
-
-<footer style="background:#000; color:#777; padding:40px 20px; text-align:center; font-size:0.85rem;">
-  <p>© 2026 Time On Focus. All rights reserved.</p>
-  <p>
-    <a href="/privacy.html" style="color:#aaa;">Privacy Policy</a> |
-    <a href="/terms.html" style="color:#aaa;">Terms of Service</a> |
-    Contact: support@timeonfocus.com
-  </p>
-</footer>
-<section>...</section>
-
-
-
-
 </body>
-
-  
 </html>
