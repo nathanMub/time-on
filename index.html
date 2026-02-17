@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Focus Timer | Minimalist Deep Work Tool</title>
+  <title>Time On Focus | Professional Focus Timer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,9 +11,10 @@
   <style>
     :root {
       --accent: #ffffff;
-      --bg: #000000;
+      --bg: #050505;
       --glass: rgba(255, 255, 255, 0.03);
       --border: rgba(255, 255, 255, 0.1);
+      --transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -22,67 +23,60 @@
       background: var(--bg);
       color: var(--accent);
       font-family: 'Inter', sans-serif;
-      line-height: 1.6;
       overflow-x: hidden;
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
+      padding: 0 20px;
     }
 
-    /* AdSense Placeholder Styling */
-    .ad-wrapper {
-      width: 100%;
-      max-width: 728px;
-      min-height: 90px;
-      margin: 20px 0;
-      background: var(--glass);
-      border: 1px dashed var(--border);
-      display: flex;
+    /* Hero Layout */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      min-height: 80vh;
       align-items: center;
-      justify-content: center;
-      color: rgba(255,255,255,0.2);
-      font-size: 0.7rem;
-      letter-spacing: 2px;
+      padding: 60px 0;
     }
 
-    .timer-box {
+    .hero-card {
       background: var(--glass);
       border: 1px solid var(--border);
-      padding: 50px 30px;
-      border-radius: 24px;
-      width: 100%;
-      max-width: 450px;
+      padding: 60px 40px;
+      border-radius: 32px;
       text-align: center;
+      transition: var(--transition);
       backdrop-filter: blur(10px);
-      transition: all 0.5s ease;
     }
 
-    #time {
+    .hero-card:hover {
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-5px);
+    }
+
+    .hero-card h2 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 20px;
+    }
+
+    .display-time {
       font-family: 'JetBrains Mono', monospace;
-      font-size: clamp(3.5rem, 10vw, 5rem);
+      font-size: clamp(2.5rem, 5vw, 4rem);
       font-weight: 600;
       margin-bottom: 30px;
     }
 
+    /* Inputs & Buttons */
     .input-group { margin-bottom: 20px; text-align: left; }
+    label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.4); display: block; margin-bottom: 8px; }
     
-    label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.5);
-      margin-bottom: 8px;
-      display: block;
-    }
-
-    select, input {
+    input {
       width: 100%;
       padding: 14px;
       background: rgba(255,255,255,0.05);
@@ -92,83 +86,112 @@
       font-family: inherit;
     }
 
-    .btn-group { display: flex; gap: 10px; margin-top: 25px; }
-    
     button {
-      flex: 1;
-      padding: 15px;
+      width: 100%;
+      padding: 16px;
       border-radius: 12px;
       border: none;
       font-weight: 600;
       cursor: pointer;
       transition: 0.3s;
+      margin-top: 10px;
     }
 
-    .btn-start { background: #fff; color: #000; }
-    .btn-reset { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-primary { background: #fff; color: #000; }
+    .btn-primary:hover { opacity: 0.9; transform: scale(1.02); }
 
-    /* Focus Mode Logic */
-    .focus-mode .timer-box { border: none; background: transparent; backdrop-filter: none; max-width: 100%; }
-    .focus-mode #controls, .focus-mode .content-section, .focus-mode .ad-wrapper, .focus-mode footer { 
-      opacity: 0; pointer-events: none; 
-    }
-    .focus-mode #time {
-      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      font-size: clamp(6rem, 20vw, 12rem);
+    /* AdSense Slots */
+    .ad-slot {
+      width: 100%;
+      max-width: 728px;
+      height: 90px;
+      margin: 40px auto;
+      background: var(--glass);
+      border: 1px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.2);
+      font-size: 0.7rem;
     }
 
-    /* Content Section for AdSense Approval */
+    /* Fullscreen Focus Styles */
+    #fullscreen-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: #000;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #fullscreen-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(6rem, 25vw, 15rem);
+      font-weight: 600;
+    }
+
+    .pause-hint {
+      margin-top: 40px;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 4px;
+    }
+
+    /* SEO Content Section */
     .content-section {
       max-width: 800px;
-      margin-top: 80px;
-      padding: 40px 20px;
+      margin: 80px auto;
+      padding: 40px 0;
       border-top: 1px solid var(--border);
     }
-
-    .content-section h1, .content-section h2 { color: #fff; margin: 30px 0 15px; }
-    .content-section p { color: #aaa; margin-bottom: 20px; font-size: 1.05rem; }
+    .content-section h1 { font-size: 2.5rem; margin-bottom: 20px; }
+    .content-section p { color: #aaa; margin-bottom: 20px; font-size: 1.1rem; line-height: 1.8; }
 
     footer {
-      width: 100%;
-      padding: 40px;
+      padding: 60px 0;
       text-align: center;
-      font-size: 0.8rem;
-      color: #666;
+      border-top: 1px solid var(--border);
     }
-    footer a { color: #999; text-decoration: none; margin: 0 10px; }
+    footer a { color: #666; text-decoration: none; margin: 0 10px; font-size: 0.9rem; }
+
+    @media (max-width: 850px) {
+      .hero { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body id="mainBody">
 
-  <div class="container" id="app" onclick="screenTap()">
-    
-    <div class="ad-wrapper">ADSENSE AUTO-ADS / BANNER</div>
+  <div class="container">
+    <nav style="padding: 30px 0; text-align: center;">
+        <span style="letter-spacing: 5px; font-weight: 600; color: rgba(255,255,255,0.2);">TIME ON FOCUS</span>
+    </nav>
 
-    <div class="timer-box">
-      <div id="time">00:00:00</div>
+    <div class="ad-slot">ADSENSE TOP BANNER</div>
 
-      <div id="controls">
+    <main class="hero">
+      <section class="hero-card">
+        <h2>Deep Work Session</h2>
+        <div class="display-time" id="down-display">00:00:00</div>
         <div class="input-group">
-          <label>Mode</label>
-          <select id="mode">
-            <option value="up">Count Up</option>
-            <option value="down">Count Down</option>
-          </select>
+            <label>Minutes for Countdown</label>
+            <input type="number" id="minutesInput" placeholder="Enter minutes (e.g. 25)">
         </div>
-        <div class="input-group">
-          <label>Duration (Minutes)</label>
-          <input type="number" id="minutesInput" placeholder="Enter minutes...">
-        </div>
-        <div class="btn-group">
-          <button class="btn-start" onclick="start(event)">Start Session</button>
-          <button class="btn-reset" onclick="reset(event)">Reset</button>
-        </div>
-      </div>
-    </div>
+        <button class="btn-primary" onclick="startSession('down')">Start Countdown</button>
+      </section>
 
-    <div class="ad-wrapper">ADSENSE IN-FEED AD</div>
+      <section class="hero-card">
+        <h2>Activity Tracking</h2>
+        <div class="display-time" id="up-display">00:00:00</div>
+        <div style="height: 72px;"></div> <button class="btn-primary" onclick="startSession('up')">Start Stopwatch</button>
+      </section>
+    </main>
 
-    <section class="content-section">
+    <div class="ad-slot">ADSENSE MIDDLE BANNER</div>
+
+    <article class="content-section">
       <h1>What Is Time On Focus?</h1>
       <p>Time On Focus is a minimal, distraction-free online focus timer designed to help you enter deep work sessions. Whether you are studying, coding, reading, or working on a project, this timer allows you to count up or count down while maintaining a clean, immersive environment.</p>
 
@@ -176,28 +199,26 @@
       <p>Choose between count up or count down mode. If using countdown mode, enter your desired number of minutes. Press start to enter focus mode. The timer expands to fullscreen and minimizes distractions. Tap anywhere on the screen to pause your session.</p>
 
       <h2>Benefits of Focus Sessions</h2>
-      <p>Structured focus sessions improve concentration, reduce task switching, and increase productivity. Research shows that working in timed intervals can help maintain mental clarity and reduce burnout.</p>
+      <p>Structured focus sessions improve concentration, reduce task switching, and increase productivity. Research shows that working in timed intervals can help maintain mental clarity and reduce burnout. By committing to uninterrupted focus periods, you train your brain to resist distractions.</p>
+    </article>
 
-      <h2>Frequently Asked Questions</h2>
-      <p><strong>Is this focus timer free?</strong><br>Yes. Time On Focus is completely free to use online.</p>
-      <p><strong>Does it work on mobile?</strong><br>Yes. The timer is fully responsive and works on smartphones, tablets, and desktop browsers.</p>
-    </section>
-
-   <footer>
-  <p>© 2026 Time On Focus. All rights reserved.</p>
-  <div style="margin-top: 12px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-    <a href="privacy.html" style="color: #888; text-decoration: none; transition: 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">Privacy Policy</a>
-    <span style="color: #333;">|</span>
-    <a href="terms.html" style="color: #888; text-decoration: none; transition: 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">Terms of Service</a>
-    <span style="color: #333;">|</span>
-    <a href="mailto:support@timeonfocus.com" style="color: #888; text-decoration: none; transition: 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">Contact Support</a>
+    <footer>
+      <p style="color: #444; margin-bottom: 15px;">© 2026 Time On Focus</p>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="mailto:support@timeonfocus.com">Contact</a>
+    </footer>
   </div>
-</footer>
+
+  <div id="fullscreen-overlay" onclick="pauseSession()">
+    <div id="fullscreen-time">00:00:00</div>
+    <div class="pause-hint">TAP TO EXIT</div>
   </div>
 
   <script>
     let totalSeconds = 0;
     let interval = null;
+    let currentMode = 'up';
 
     function formatTime(sec) {
       const h = String(Math.floor(sec / 3600)).padStart(2, '0');
@@ -206,75 +227,53 @@
       return `${h}:${m}:${s}`;
     }
 
-    function updateDisplay() {
-      document.getElementById("time").textContent = formatTime(totalSeconds);
-      // Update browser tab title to show time remaining
-      document.title = `${formatTime(totalSeconds)} - Time On Focus`;
-    }
-
-    function start(event) {
-      if (event) event.stopPropagation();
-      if (interval) return;
-
-      const mode = document.getElementById("mode").value;
+    function startSession(mode) {
+      currentMode = mode;
       const minutesInput = document.getElementById("minutesInput").value;
 
-      // Handle Countdown initial value
-      if (mode === "down" && totalSeconds === 0) {
+      if (mode === 'down') {
         totalSeconds = parseInt(minutesInput || 0) * 60;
-        if (totalSeconds === 0) return;
-        updateDisplay();
+        if (totalSeconds <= 0) return;
+      } else {
+        totalSeconds = 0;
       }
 
-      // ENTER FULLSCREEN
-      const elem = document.documentElement;
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      } else if (elem.webkitRequestFullscreen) { /* Safari */
-        elem.webkitRequestFullscreen();
-      } else if (elem.msRequestFullscreen) { /* IE11 */
-        elem.msRequestFullscreen();
-      }
+      // Handle Fullscreen
+      const doc = document.documentElement;
+      if (doc.requestFullscreen) doc.requestFullscreen();
+      else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
 
-      // Trigger Focus Mode UI
-      document.getElementById("mainBody").classList.add("focus-mode");
+      document.getElementById("fullscreen-overlay").style.display = 'flex';
+      updateUI();
 
       interval = setInterval(() => {
-        if (mode === "up") {
+        if (currentMode === 'up') {
           totalSeconds++;
-        } else if (mode === "down") {
-          if (totalSeconds <= 0) {
-            pause();
-            return;
-          }
+        } else {
           totalSeconds--;
+          if (totalSeconds <= 0) pauseSession();
         }
-        updateDisplay();
+        updateUI();
       }, 1000);
     }
 
-    function pause() {
+    function updateUI() {
+      const timeStr = formatTime(totalSeconds);
+      document.getElementById("fullscreen-time").textContent = timeStr;
+      
+      // Update the hero cards too
+      if (currentMode === 'down') document.getElementById("down-display").textContent = timeStr;
+      else document.getElementById("up-display").textContent = timeStr;
+      
+      document.title = timeStr + " - Focusing";
+    }
+
+    function pauseSession() {
       clearInterval(interval);
       interval = null;
-      document.getElementById("mainBody").classList.remove("focus-mode");
-
-      // EXIT FULLSCREEN
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(err => console.log(err));
-      }
-    }
-
-    function reset(event) {
-      if (event) event.stopPropagation();
-      pause();
-      totalSeconds = 0;
-      document.getElementById("minutesInput").value = "";
-      updateDisplay();
-    }
-
-    function screenTap() {
-      // Only pause if the timer is actually running
-      if (interval) pause();
+      document.getElementById("fullscreen-overlay").style.display = 'none';
+      if (document.fullscreenElement) document.exitFullscreen();
+      document.title = "Time On Focus";
     }
   </script>
 </body>
