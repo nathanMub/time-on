@@ -208,21 +208,36 @@
 
     function updateDisplay() {
       document.getElementById("time").textContent = formatTime(totalSeconds);
+      // Update browser tab title to show time remaining
+      document.title = `${formatTime(totalSeconds)} - Time On Focus`;
     }
 
     function start(event) {
-      event.stopPropagation();
+      if (event) event.stopPropagation();
       if (interval) return;
 
       const mode = document.getElementById("mode").value;
-      document.getElementById("mainBody").classList.add("focus-mode");
+      const minutesInput = document.getElementById("minutesInput").value;
 
+      // Handle Countdown initial value
       if (mode === "down" && totalSeconds === 0) {
-        const minutes = parseInt(document.getElementById("minutesInput").value || 0);
-        totalSeconds = minutes * 60;
+        totalSeconds = parseInt(minutesInput || 0) * 60;
         if (totalSeconds === 0) return;
         updateDisplay();
       }
+
+      // ENTER FULLSCREEN
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) { /* Safari */
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) { /* IE11 */
+        elem.msRequestFullscreen();
+      }
+
+      // Trigger Focus Mode UI
+      document.getElementById("mainBody").classList.add("focus-mode");
 
       interval = setInterval(() => {
         if (mode === "up") {
@@ -242,16 +257,23 @@
       clearInterval(interval);
       interval = null;
       document.getElementById("mainBody").classList.remove("focus-mode");
+
+      // EXIT FULLSCREEN
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(err => console.log(err));
+      }
     }
 
     function reset(event) {
-      event.stopPropagation();
+      if (event) event.stopPropagation();
       pause();
       totalSeconds = 0;
+      document.getElementById("minutesInput").value = "";
       updateDisplay();
     }
 
     function screenTap() {
+      // Only pause if the timer is actually running
       if (interval) pause();
     }
   </script>
