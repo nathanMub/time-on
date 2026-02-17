@@ -37,8 +37,8 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 30px;
-      min-height: 80vh;
-      align-items: center;
+      min-height: 70vh;
+      align-items: stretch;
       padding: 60px 0;
     }
 
@@ -50,6 +50,9 @@
       text-align: center;
       transition: var(--transition);
       backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .hero-card:hover {
@@ -84,21 +87,33 @@
       border-radius: 12px;
       color: white;
       font-family: inherit;
+      outline: none;
+    }
+
+    input:focus { border-color: rgba(255,255,255,0.3); }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
     }
 
     button {
-      width: 100%;
+      flex: 1;
       padding: 16px;
       border-radius: 12px;
       border: none;
       font-weight: 600;
       cursor: pointer;
       transition: 0.3s;
-      margin-top: 10px;
+      font-family: inherit;
     }
 
     .btn-primary { background: #fff; color: #000; }
-    .btn-primary:hover { opacity: 0.9; transform: scale(1.02); }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    .btn-secondary { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid var(--border); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.15); }
 
     /* AdSense Slots */
     .ad-slot {
@@ -115,7 +130,7 @@
       font-size: 0.7rem;
     }
 
-    /* Fullscreen Focus Styles */
+    /* Fullscreen Mode Element */
     #fullscreen-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -176,16 +191,22 @@
         <h2>Deep Work Session</h2>
         <div class="display-time" id="down-display">00:00:00</div>
         <div class="input-group">
-            <label>Minutes for Countdown</label>
-            <input type="number" id="minutesInput" placeholder="Enter minutes (e.g. 25)">
+            <label>Set Duration (Minutes)</label>
+            <input type="number" id="minutesInput" placeholder="e.g. 25" min="1">
         </div>
-        <button class="btn-primary" onclick="startSession('down')">Start Countdown</button>
+        <div class="button-group">
+          <button class="btn-primary" onclick="startSession('down')">Start</button>
+          <button class="btn-secondary" onclick="resetSection('down')">Reset</button>
+        </div>
       </section>
 
       <section class="hero-card">
         <h2>Activity Tracking</h2>
         <div class="display-time" id="up-display">00:00:00</div>
-        <div style="height: 72px;"></div> <button class="btn-primary" onclick="startSession('up')">Start Stopwatch</button>
+        <div style="height: 72px;"></div> <div class="button-group">
+          <button class="btn-primary" onclick="startSession('up')">Start</button>
+          <button class="btn-secondary" onclick="resetSection('up')">Reset</button>
+        </div>
       </section>
     </main>
 
@@ -235,13 +256,16 @@
         totalSeconds = parseInt(minutesInput || 0) * 60;
         if (totalSeconds <= 0) return;
       } else {
-        totalSeconds = 0;
+        // For count up, start from 0 unless already in progress
+        if (totalSeconds === 0) totalSeconds = 0;
       }
 
       // Handle Fullscreen
       const doc = document.documentElement;
-      if (doc.requestFullscreen) doc.requestFullscreen();
-      else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+      try {
+        if (doc.requestFullscreen) doc.requestFullscreen();
+        else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+      } catch (e) { console.log("Fullscreen blocked"); }
 
       document.getElementById("fullscreen-overlay").style.display = 'flex';
       updateUI();
@@ -251,7 +275,10 @@
           totalSeconds++;
         } else {
           totalSeconds--;
-          if (totalSeconds <= 0) pauseSession();
+          if (totalSeconds <= 0) {
+            totalSeconds = 0;
+            pauseSession();
+          }
         }
         updateUI();
       }, 1000);
@@ -261,9 +288,11 @@
       const timeStr = formatTime(totalSeconds);
       document.getElementById("fullscreen-time").textContent = timeStr;
       
-      // Update the hero cards too
-      if (currentMode === 'down') document.getElementById("down-display").textContent = timeStr;
-      else document.getElementById("up-display").textContent = timeStr;
+      if (currentMode === 'down') {
+        document.getElementById("down-display").textContent = timeStr;
+      } else {
+        document.getElementById("up-display").textContent = timeStr;
+      }
       
       document.title = timeStr + " - Focusing";
     }
@@ -272,7 +301,24 @@
       clearInterval(interval);
       interval = null;
       document.getElementById("fullscreen-overlay").style.display = 'none';
-      if (document.fullscreenElement) document.exitFullscreen();
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+      document.title = "Time On Focus";
+    }
+
+    function resetSection(mode) {
+      pauseSession();
+      totalSeconds = 0;
+      const zeroTime = "00:00:00";
+      
+      if (mode === 'down') {
+        document.getElementById("down-display").textContent = zeroTime;
+        document.getElementById("minutesInput").value = "";
+      } else {
+        document.getElementById("up-display").textContent = zeroTime;
+      }
+      
       document.title = "Time On Focus";
     }
   </script>
